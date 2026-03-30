@@ -4,7 +4,7 @@ export default function TopNav() {
   return (
     <div className="border-b bg-white">
       <div className="mx-auto flex max-w-5xl items-center gap-4 px-4 py-3">
-        <div className="text-sm font-semibold text-zinc-900">Invoice Management System</div>
+        <Link  href="/dashboard" className="text-sm font-semibold text-zinc-900">Invoice Management System</Link>
         <nav className="flex items-center gap-4 text-sm text-zinc-700">
           <Link className="hover:text-zinc-900" href="/dashboard">
             Dashboard
