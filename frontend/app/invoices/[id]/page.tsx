@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import { apiGet, normalizeApiError } from "@/lib/api";
@@ -19,12 +20,20 @@ type InvoiceDetail = {
   items: { id: number; product_name: string; quantity: number; price: string }[];
 };
 
-export default function InvoiceDetailPage({ params }: { params: { id: string } }) {
+export default function InvoiceDetailPage() {
+  const params = useParams<{ id?: string }>();
+  const invoiceId = params?.id;
   const [data, setData] = useState<InvoiceDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    if (!invoiceId || invoiceId === "undefined" || invoiceId === "null") {
+      setLoading(false);
+      setError("Invalid invoice id in URL. Please go back to the invoices list and open a valid invoice.");
+      return;
+    }
+
     const token = getAccessToken();
     if (!token) {
       setLoading(false);
@@ -34,7 +43,7 @@ export default function InvoiceDetailPage({ params }: { params: { id: string } }
 
     (async () => {
       try {
-        const res = await apiGet<InvoiceDetail>(`/api/invoices/${params.id}/`);
+        const res = await apiGet<InvoiceDetail>(`/api/invoices/${invoiceId}/`);
         setData(res);
       } catch (e) {
         setError(normalizeApiError(e));
@@ -42,7 +51,7 @@ export default function InvoiceDetailPage({ params }: { params: { id: string } }
         setLoading(false);
       }
     })();
-  }, [params.id]);
+  }, [invoiceId]);
 
   if (loading) return <LoadingState label="Loading invoice..." />;
   if (error) {

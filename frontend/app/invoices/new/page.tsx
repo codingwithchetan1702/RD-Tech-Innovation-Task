@@ -8,7 +8,10 @@ import { getAccessToken } from "@/lib/auth";
 import ErrorState from "@/components/ErrorState";
 
 type LineItemDraft = { product_name: string; quantity: number; price: number };
-type CreatedInvoiceResponse = { id: number };
+type CreatedInvoiceResponse = {
+  id?: number | string;
+  pk?: number | string;
+};
 
 export default function NewInvoicePage() {
   const router = useRouter();
@@ -79,7 +82,17 @@ export default function NewInvoicePage() {
       };
 
       const created = await apiPost<CreatedInvoiceResponse>("/api/invoices/", payload);
-      router.push(`/invoices/${created.id}`);
+      const rawId = created?.id ?? created?.pk;
+      const invoiceId = typeof rawId === "string" ? Number(rawId) : rawId;
+
+      if (!invoiceId || !Number.isFinite(Number(invoiceId))) {
+        setError(
+          `Invoice created, but no valid id returned by API. Response was: ${JSON.stringify(created)}`
+        );
+        return;
+      }
+
+      router.push(`/invoices/${invoiceId}`);
     } catch (err) {
       setError(normalizeApiError(err));
     } finally {
